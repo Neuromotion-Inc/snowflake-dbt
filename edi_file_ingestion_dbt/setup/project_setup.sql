@@ -1,43 +1,12 @@
 -- =============================================================================
 -- EDI File Ingestion dbt Project: Environment Setup
 --
--- PURPOSE
---   Builds a development Snowflake account that mimics the parts of our
---   production HIPAA account which the edi_file_ingestion dbt project depends on,
---   so the project can be developed and tested without touching real data.
+-- Sets up a dev/sandbox Snowflake account that mimics the production HIPAA
+-- account, so the edi_file_ingestion dbt project can be developed and tested
+-- without touching real data. Do NOT run this in the production HIPAA account.
 --
---   Do NOT run this in the production HIPAA account. Those objects already
---   exist there (or are managed separately), and this script is only for a
---   dev/sandbox account where you have ACCOUNTADMIN.
---
--- WHAT IT CREATES
---   1. Stand-ins for existing production objects:
---        - ETL_WH warehouse used to run dbt
---        - FIVETRAN_DB.AVAILITY."ALL" stage, where the Fivetran SFTP connector
---          lands the EDI files that dbt reads as its source data
---   2. The dbt project's own database (edi_file_ingestion_db) with a `dev`
---      schema (local development and Snowsight runs) and a `prod` schema
---      (production-style runs)
---   3. Logging, tracing, and metrics settings on the dev and prod schemas, so
---      dbt project runs are observable in Snowsight
---   4. EFI_DBT_ROLE, the role dbt runs as, with only the grants it needs
---      (warehouse, read access to the Fivetran stage, write access to the dbt
---      schemas), granted to user ALEX
---
--- USAGE
---   Run once, top to bottom, as ACCOUNTADMIN (e.g. in a Snowsight worksheet or
---   with `snow sql -f`). It is safe to re-run: every statement is idempotent
---   (CREATE ... IF NOT EXISTS, CREATE OR ALTER, or ALTER ... SET), and it never
---   drops or replaces objects, so staged files and dbt output are preserved.
---
--- NOT INCLUDED
---   - Sample EDI files: the stage is created empty, so load some mock files
---     into it before running dbt.
---   - GitHub integration, network rules, and CI/CD users. See
---     tasty_bytes_setup.sql and ci_cd_setup.sql for reference examples.
---
--- Adapted from:
---   https://docs.snowflake.com/en/user-guide/tutorials/dbt-projects-on-snowflake-getting-started-tutorial
+-- Run as ACCOUNTADMIN. Safe to re-run: it never drops or replaces objects.
+-- Sample EDI files are not included; load some into the stage before running dbt.
 -- =============================================================================
 
 USE ROLE ACCOUNTADMIN;
