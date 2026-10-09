@@ -1,8 +1,8 @@
 ## Project
-name: tasty_bytes
+name: edi_file_ingestion
 version: "1.0"
 config-version: 2
-profile: tasty_bytes
+profile: edi_file_ingestion
 
 ## Sources
 model-paths: [models]
@@ -18,7 +18,7 @@ clean-targets: [target, dbt_modules]
 
 ## Models
 models:
-  tasty_bytes:
+  edi_file_ingestion:
     staging:
       +materialized: view
     marts:

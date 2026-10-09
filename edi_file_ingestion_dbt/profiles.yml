@@ -1,4 +1,4 @@
-tasty_bytes:
+edi_file_ingestion:
   # the default target (from outputs)
   target: dev
   outputs:
@@ -24,11 +24,11 @@ tasty_bytes:
     # (Inside Snowflake, dbt is already authenticated, so dev/prod above need no credentials.)
     alex-local:
       type: snowflake
-      account: ey50650-mightier_hipaa
+      account: ey50650-mightier_staging
       user: ALEX
       authenticator: snowflake_jwt
       private_key_path: "{{ env_var('HOME') }}/.snowflake/rsa_key.p8"
-      role: SANDBOX_ADMIN
+      role: ACCOUNTADMIN
       database: SANDBOX_DB
       schema: DBT_SCHEMA_ALEX
       warehouse: ETL_WH
