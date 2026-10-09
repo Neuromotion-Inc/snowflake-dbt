@@ -1,12 +1,12 @@
 edi_file_ingestion:
   # the default target (from outputs)
-  target: dev
+  target: alex_local
   outputs:
     dev:
       type: snowflake
       account: 'not needed'
       user: 'not needed'
-      role: SANDBOX_ADMIN
+      role: EFI_DBT_ROLE
       database: SANDBOX_DB
       schema: DBT_SCHEMA_DEV
       warehouse: ETL_WH
@@ -15,21 +15,21 @@ edi_file_ingestion:
     #   type: snowflake
     #   account: 'not needed'
     #   user: 'not needed'
-    #   role: accountadmin
+    #   role: EFI_DBT_ROLE
     #   database: tasty_bytes_dbt_db
     #   schema: prod
     #   warehouse: tasty_bytes_dbt_wh
     #   threads: 8
     # Used when running dbt on your own machine: `uv run dbt <cmd> --target local`
     # (Inside Snowflake, dbt is already authenticated, so dev/prod above need no credentials.)
-    alex-local:
+    alex_local:
       type: snowflake
       account: ey50650-mightier_staging
       user: ALEX
       authenticator: snowflake_jwt
       private_key_path: "{{ env_var('HOME') }}/.snowflake/rsa_key.p8"
-      role: ACCOUNTADMIN
-      database: SANDBOX_DB
-      schema: DBT_SCHEMA_ALEX
+      role: EFI_DBT_ROLE
+      database: edi_file_ingestion_db
+      schema: dev
       warehouse: ETL_WH
       threads: 8
