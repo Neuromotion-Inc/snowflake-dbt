@@ -37,3 +37,15 @@ Task definitions for running the dbt project on a schedule using Snowflake Tasks
 2. Run `tasty_bytes_setup.sql` in a Snowflake worksheet to create the environment and load source data.
 3. Create a [workspace in Snowsight](https://docs.snowflake.com/en/user-guide/ui-snowsight/workspaces) connected to your fork.
 4. Run `dbt deps`, then `dbt run` from the workspace.
+
+## Local Development (optional)
+
+Python tooling (`dbt-core`, `dbt-snowflake`, and the Snowflake CLI) is managed with [uv](https://docs.astral.sh/uv/).
+
+```bash
+uv sync                                   # create .venv and install pinned dependencies
+uv run snow --version                     # Snowflake CLI
+cd tasty_bytes_dbt_demo && uv run dbt deps
+```
+
+Add or upgrade packages with `uv add <package>` / `uv lock --upgrade`, and commit `pyproject.toml` and `uv.lock`.
