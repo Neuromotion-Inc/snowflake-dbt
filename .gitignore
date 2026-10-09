@@ -7,3 +7,6 @@ tasty_bytes_dbt_demo/logs/
 .venv/
 __pycache__/
 *.pyc
+
+# dotfile for .dbt proj
+.user.yml

@@ -1,21 +1,35 @@
 tasty_bytes:
+  # the default target (from outputs)
   target: dev
   outputs:
     dev:
       type: snowflake
       account: 'not needed'
       user: 'not needed'
-      role: accountadmin
-      database: tasty_bytes_dbt_db
-      schema: dev
-      warehouse: tasty_bytes_dbt_wh
+      role: SANDBOX_ADMIN
+      database: SANDBOX_DB
+      schema: DBT_SCHEMA_DEV
+      warehouse: ETL_WH
       threads: 8
-    prod:
+    # prod:
+    #   type: snowflake
+    #   account: 'not needed'
+    #   user: 'not needed'
+    #   role: accountadmin
+    #   database: tasty_bytes_dbt_db
+    #   schema: prod
+    #   warehouse: tasty_bytes_dbt_wh
+    #   threads: 8
+    # Used when running dbt on your own machine: `uv run dbt <cmd> --target local`
+    # (Inside Snowflake, dbt is already authenticated, so dev/prod above need no credentials.)
+    alex-local:
       type: snowflake
-      account: 'not needed'
-      user: 'not needed'
-      role: accountadmin
-      database: tasty_bytes_dbt_db
-      schema: prod
-      warehouse: tasty_bytes_dbt_wh
+      account: ey50650-mightier_hipaa
+      user: ALEX
+      authenticator: snowflake_jwt
+      private_key_path: "{{ env_var('HOME') }}/.snowflake/rsa_key.p8"
+      role: SANDBOX_ADMIN
+      database: SANDBOX_DB
+      schema: DBT_SCHEMA_ALEX
+      warehouse: ETL_WH
       threads: 8
