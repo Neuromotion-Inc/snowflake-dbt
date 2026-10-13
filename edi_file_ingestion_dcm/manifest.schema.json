@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Snowflake DCM project manifest (v2)",
+  "description": "Hand-written from snowflake-cli 3.27.0 (_plugins/dcm/models.py) and https://docs.snowflake.com/en/user-guide/dcm-projects/dcm-projects-files. Snowflake does not publish an official schema.",
+  "type": "object",
+  "required": ["manifest_version", "type", "targets"],
+  "additionalProperties": false,
+  "properties": {
+    "manifest_version": {
+      "description": "Only version 2 is supported.",
+      "type": "integer",
+      "enum": [2]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["DCM_PROJECT"]
+    },
+    "default_target": {
+      "description": "Target used when --target is not passed. Optional if only one target is defined.",
+      "type": "string"
+    },
+    "targets": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/definitions/target" }
+    },
+    "templating": { "$ref": "#/definitions/templating" },
+    "assets": {
+      "description": "Named collections of repo-relative files.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/definitions/identifier", "maxLength": 255 },
+      "additionalProperties": { "$ref": "#/definitions/asset" }
+    }
+  },
+  "definitions": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+    },
+    "target": {
+      "type": "object",
+      "required": ["project_name"],
+      "additionalProperties": false,
+      "properties": {
+        "account_identifier": {
+          "description": "Snowflake account identifier, e.g. MYORG-MYACCOUNT.",
+          "type": "string"
+        },
+        "project_name": {
+          "description": "Fully qualified DCM project name, e.g. DB.SCHEMA.PROJECT.",
+          "type": "string"
+        },
+        "project_owner": {
+          "description": "Role with OWNERSHIP on the project object.",
+          "type": "string"
+        },
+        "templating_config": {
+          "description": "Name of a key under templating.configurations (case-insensitive).",
+          "type": "string"
+        }
+      }
+    },
+    "variables": {
+      "description": "Template variables. Names follow Python identifier rules.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/definitions/identifier" },
+      "additionalProperties": {
+        "type": ["string", "number", "boolean", "array", "object"]
+      }
+    },
+    "envDeclaration": {
+      "description": "Single-key mapping, e.g. `- BUILD_NUMBER:`",
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 1,
+      "propertyNames": {
+        "$ref": "#/definitions/identifier",
+        "not": { "const": "_snow" }
+      },
+      "additionalProperties": { "type": "null" }
+    },
+    "templating": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "defaults": { "$ref": "#/definitions/variables" },
+        "configurations": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/variables" }
+        },
+        "env_vars": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/envDeclaration" }
+        },
+        "env_secrets": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/envDeclaration" }
+        }
+      }
+    },
+    "assetPath": {
+      "description": "Repo-relative path or glob (* and ** only). No leading / or @, no . or .. segments, no trailing separator.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?![/\\\\@])(?!.*://)[^?{}]*[^/\\\\]$"
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "oneOf": [
+        { "required": ["path"], "not": { "required": ["paths"] } },
+        { "required": ["paths"], "not": { "required": ["path"] } }
+      ],
+      "properties": {
+        "path": { "$ref": "#/definitions/assetPath" },
+        "paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/assetPath" }
+        }
+      }
+    }
+  }
+}
