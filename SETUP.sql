@@ -15,23 +15,31 @@
 
 USE ROLE ACCOUNTADMIN;
 
--- Holds the DCM project objects, kept apart from the databases they manage
-CREATE DATABASE IF NOT EXISTS dcm_db;
-CREATE SCHEMA IF NOT EXISTS dcm_db.dcm_projects;
-
 -- Role that owns the DCM projects. PLAN/DEPLOY require OWNERSHIP on the project,
 -- and objects are deployed with this role's privileges.
-CREATE ROLE IF NOT EXISTS DCM_DEPLOYER;
--- Standard hierarchy: SYSADMIN (and thus ACCOUNTADMIN) inherits DCM_DEPLOYER
-GRANT ROLE DCM_DEPLOYER TO ROLE SYSADMIN;
+CREATE ROLE IF NOT EXISTS dcm_developer;
+SET user_name = (SELECT CURRENT_USER());
+GRANT ROLE dcm_developer TO USER IDENTIFIER($user_name);
 
-GRANT USAGE ON DATABASE dcm_db TO ROLE DCM_DEPLOYER;
-GRANT USAGE ON SCHEMA dcm_db.dcm_projects TO ROLE DCM_DEPLOYER;
-GRANT CREATE DCM PROJECT ON SCHEMA dcm_db.dcm_projects TO ROLE DCM_DEPLOYER;
--- The Snowflake CLI uploads local definition files to a temporary stage in this schema
-GRANT CREATE STAGE ON SCHEMA dcm_db.dcm_projects TO ROLE DCM_DEPLOYER;
+GRANT CREATE WAREHOUSE ON ACCOUNT TO ROLE dcm_developer;
+GRANT CREATE ROLE ON ACCOUNT TO ROLE dcm_developer;
+GRANT CREATE DATABASE ON ACCOUNT TO ROLE dcm_developer;
+GRANT EXECUTE MANAGED TASK ON ACCOUNT TO ROLE dcm_developer;
+GRANT EXECUTE TASK ON ACCOUNT TO ROLE dcm_developer;
+GRANT MANAGE GRANTS ON ACCOUNT TO ROLE dcm_developer;
 
--- Create the project as DCM_DEPLOYER so it owns them
-USE ROLE DCM_DEPLOYER;
-CREATE DCM PROJECT IF NOT EXISTS dcm_db.dcm_projects.EDI_FILE_INGESTION
-    COMMENT = 'EDI file ingestion: production';
+GRANT APPLICATION ROLE SNOWFLAKE.DATA_QUALITY_MONITORING_VIEWER TO ROLE dcm_developer;
+GRANT APPLICATION ROLE SNOWFLAKE.DATA_QUALITY_MONITORING_ADMIN TO ROLE dcm_developer;
+GRANT DATABASE ROLE SNOWFLAKE.DATA_METRIC_USER TO ROLE dcm_developer;
+GRANT EXECUTE DATA METRIC FUNCTION ON ACCOUNT TO ROLE dcm_developer;
+
+-- 
+-- work done as dcm_developer
+-- 
+USE ROLE dcm_developer;
+
+CREATE DATABASE IF NOT EXISTS dcm_db;
+CREATE SCHEMA IF NOT EXISTS dcm_db.projects;
+
+CREATE OR REPLACE DCM PROJECT dcm_db.projects.edi_file_ingestion
+    COMMENT = 'Availity EDI file ingestion';
