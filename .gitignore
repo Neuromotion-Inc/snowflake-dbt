@@ -10,3 +10,5 @@ __pycache__/
 
 # dotfile for .dbt proj
 .user.yml
+
+.folder
