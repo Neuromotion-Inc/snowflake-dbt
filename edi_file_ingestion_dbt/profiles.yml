@@ -2,7 +2,7 @@ edi_file_ingestion:
   # the default target (from outputs)
   target: alex_local
   outputs:
-    dev:
+    pre_prod:
       type: snowflake
       account: 'not needed'
       user: 'not needed'
