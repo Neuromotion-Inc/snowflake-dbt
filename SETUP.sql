@@ -41,8 +41,8 @@ USE ROLE dcm_developer;
 CREATE DATABASE IF NOT EXISTS dcm_db;
 CREATE SCHEMA IF NOT EXISTS dcm_db.projects;
 
-CREATE DCM PROJECT IF NOT EXISTS dcm_db.projects.edi_file_ingestion
-    COMMENT = 'Availity EDI file ingestion';
+CREATE DCM PROJECT IF NOT EXISTS dcm_db.projects.hipaa_dcm
+    COMMENT = 'Project for Mightier HIPAA snowflake acct';
 
 --
 -- ACCOUNT PARITY: objects that exist in MIGHTIER_HIPAA (Fivetran etc.) but are
