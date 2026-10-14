@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../dcm-manifest.schema.json
+manifest_version: 2
+type: DCM_PROJECT
+
+default_target: DEV
+
+targets:
+  DEV:
+    account_identifier: ey50650-mightier_staging
+    project_name: dcm_db.projects.edi_file_ingestion
+    project_owner: DCM_DEVELOPER
+    # templating_config: DEV
+
+templating:
+  defaults: {}
+  configurations:
+    DEV: {}
