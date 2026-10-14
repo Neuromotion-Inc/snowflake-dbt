@@ -25,7 +25,9 @@ DEFINE STREAM edi_file_ingestion.app.edi_file_stream
 DEFINE TASK edi_file_ingestion.app.load_edi_raw
   WAREHOUSE = ETL_WH
   WHEN SYSTEM$STREAM_HAS_DATA('edi_file_ingestion.app.edi_file_stream')
-  STARTED
+  -- must be SUSPENDED on the first deploy, since ownership moves to the runner role
+  -- in that same deploy. Switch to STARTED and deploy again afterwards.
+  SUSPENDED
 AS
   MERGE INTO edi_file_ingestion.app.edi_raw dest
   USING (
@@ -39,8 +41,31 @@ AS
     WHERE s.METADATA$ACTION = 'INSERT'
   ) src
   ON dest.file_path = src.file_path
-  WHEN MATCHED THEN UPDATE SET
-    raw_text = src.raw_text,
-    loaded_at = CURRENT_TIMESTAMP()
+  -- WHEN MATCHED THEN UPDATE SET
+  --   raw_text = src.raw_text,
+  --   loaded_at = CURRENT_TIMESTAMP()
   WHEN NOT MATCHED THEN INSERT (file_path, raw_text, loaded_at)
     VALUES (src.file_path, src.raw_text, CURRENT_TIMESTAMP());
+
+-- Low-privilege role the task runs as. Tasks run with their owner's privileges,
+-- so ownership is handed to this role rather than left with the project owner (project owner has mega perms)
+DEFINE ROLE edi_file_ingestion_runner;
+-- keeps the project owner able to manage the task after ownership moves
+GRANT ROLE edi_file_ingestion_runner TO ROLE dcm_developer;
+
+GRANT EXECUTE TASK ON ACCOUNT TO ROLE edi_file_ingestion_runner;
+GRANT USAGE ON WAREHOUSE ETL_WH TO ROLE edi_file_ingestion_runner;
+
+-- source: Fivetran stage (external to this project), our stream & file format
+GRANT USAGE ON DATABASE FIVETRAN_DATABASE TO ROLE edi_file_ingestion_runner;
+GRANT USAGE ON SCHEMA FIVETRAN_DATABASE.AVAILITY TO ROLE edi_file_ingestion_runner;
+GRANT READ ON STAGE FIVETRAN_DATABASE.AVAILITY."ALL" TO ROLE edi_file_ingestion_runner;
+GRANT USAGE ON DATABASE edi_file_ingestion TO ROLE edi_file_ingestion_runner;
+GRANT USAGE ON SCHEMA edi_file_ingestion.app TO ROLE edi_file_ingestion_runner;
+GRANT SELECT ON STREAM edi_file_ingestion.app.edi_file_stream TO ROLE edi_file_ingestion_runner;
+GRANT USAGE ON FILE FORMAT edi_file_ingestion.app.ff_edi_raw TO ROLE edi_file_ingestion_runner;
+
+-- destination
+GRANT SELECT, INSERT, UPDATE ON TABLE edi_file_ingestion.app.edi_raw TO ROLE edi_file_ingestion_runner;
+
+GRANT OWNERSHIP ON TASK edi_file_ingestion.app.load_edi_raw TO ROLE edi_file_ingestion_runner;
